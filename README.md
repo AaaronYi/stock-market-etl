@@ -89,19 +89,18 @@ Verify in BigQuery:
 
 Check that rows are landing in your dataset/table.
 
-File Structure
+```
 stock_etl/
 ├── dags/
-│   ├── fetch_and_load.py
-│   └── stock_dag.py
+│   ├── stock_dag.py
+│   └── fetch_and_load.py
 ├── include/
 │   └── credentials/
 │       └── adc.json
 ├── requirements.txt
-├── Dockerfile
-├── airflow_settings.yaml
-├── README.md
-└── ...
+└── README.md
+```
+
 Customization
 Add more stocks: Edit the symbols in fetch_and_load.py
 
