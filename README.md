@@ -14,7 +14,6 @@ This project is a **zero-budget, end-to-end ETL pipeline** that automatically:
 
 ## Architecture
 
-![etl-diagram](diagram.png) <!-- (Add a diagram if you want) -->
 
 **Pipeline Flow:**
 1. **Extract:** Pull equities data from Alpha Vantage (free API, up to 5 calls/min)
