@@ -1,4 +1,4 @@
-# 🏦 Stock Market ETL Pipeline (Free, Cloud-Native, Automated)
+# Stock Market ETL Pipeline (Free, Cloud-Native, Automated)
 
 ## Overview
 
