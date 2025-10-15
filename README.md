@@ -1,45 +1,130 @@
-Overview
-========
+# 🏦 Stock Market ETL Pipeline (Free, Cloud-Native, Automated)
 
-Welcome to Astronomer! This project was generated after you ran 'astro dev init' using the Astronomer CLI. This readme describes the contents of the project, as well as how to run Apache Airflow on your local machine.
+## Overview
 
-Project Contents
-================
+This project is a **zero-budget, end-to-end ETL pipeline** that automatically:
+- Fetches daily stock market data from the [Alpha Vantage API](https://www.alphavantage.co)
+- Loads the data into a Google BigQuery data warehouse (using the free sandbox tier)
+- Orchestrates and schedules everything with Apache Airflow, running locally via Docker/Astronomer CLI
+- Optionally, can add data quality checks with Great Expectations
 
-Your Astro project contains the following files and folders:
+**Ideal for learning data engineering, cloud orchestration, and showcasing real-world ETL skills to recruiters.**
 
-- dags: This folder contains the Python files for your Airflow DAGs. By default, this directory includes one example DAG:
-    - `example_astronauts`: This DAG shows a simple ETL pipeline example that queries the list of astronauts currently in space from the Open Notify API and prints a statement for each astronaut. The DAG uses the TaskFlow API to define tasks in Python, and dynamic task mapping to dynamically print a statement for each astronaut. For more on how this DAG works, see our [Getting started tutorial](https://www.astronomer.io/docs/learn/get-started-with-airflow).
-- Dockerfile: This file contains a versioned Astro Runtime Docker image that provides a differentiated Airflow experience. If you want to execute other commands or overrides at runtime, specify them here.
-- include: This folder contains any additional files that you want to include as part of your project. It is empty by default.
-- packages.txt: Install OS-level packages needed for your project by adding them to this file. It is empty by default.
-- requirements.txt: Install Python packages needed for your project by adding them to this file. It is empty by default.
-- plugins: Add custom or community plugins for your project to this file. It is empty by default.
-- airflow_settings.yaml: Use this local-only file to specify Airflow Connections, Variables, and Pools instead of entering them in the Airflow UI as you develop DAGs in this project.
+---
 
-Deploy Your Project Locally
-===========================
+## Architecture
 
-Start Airflow on your local machine by running 'astro dev start'.
+![etl-diagram](diagram.png) <!-- (Add a diagram if you want) -->
 
-This command will spin up five Docker containers on your machine, each for a different Airflow component:
+**Pipeline Flow:**
+1. **Extract:** Pull equities data from Alpha Vantage (free API, up to 5 calls/min)
+2. **Transform:** Clean & structure data in Python (`fetch_and_load.py`)
+3. **Load:** Write results to BigQuery's forever-free sandbox
+4. **Orchestrate:** Schedule and monitor with Airflow, running in Docker via Astronomer CLI
 
-- Postgres: Airflow's Metadata Database
-- Scheduler: The Airflow component responsible for monitoring and triggering tasks
-- DAG Processor: The Airflow component responsible for parsing DAGs
-- API Server: The Airflow component responsible for serving the Airflow UI and API
-- Triggerer: The Airflow component responsible for triggering deferred tasks
+---
 
-When all five containers are ready the command will open the browser to the Airflow UI at http://localhost:8080/. You should also be able to access your Postgres Database at 'localhost:5432/postgres' with username 'postgres' and password 'postgres'.
+## Prerequisites
 
-Note: If you already have either of the above ports allocated, you can either [stop your existing Docker containers or change the port](https://www.astronomer.io/docs/astro/cli/troubleshoot-locally#ports-are-not-available-for-my-local-airflow-webserver).
+- **Windows 10/11** with [WSL2 & Ubuntu](https://learn.microsoft.com/en-us/windows/wsl/)
+- **Docker Desktop** (with WSL2 integration enabled)
+- **Astronomer CLI** (local Airflow)
+- **Google Cloud account** (free, no billing needed for BigQuery Sandbox)
+- **Alpha Vantage API Key** (free [here](https://www.alphavantage.co/support/#api-key))
 
-Deploy Your Project to Astronomer
-=================================
+---
 
-If you have an Astronomer account, pushing code to a Deployment on Astronomer is simple. For deploying instructions, refer to Astronomer documentation: https://www.astronomer.io/docs/astro/deploy-code/
+## Setup Guide
 
-Contact
-=======
+1. **Enable WSL2 and Install Ubuntu:**  
+   See [WSL install docs](https://learn.microsoft.com/en-us/windows/wsl/)
 
-The Astronomer CLI is maintained with love by the Astronomer team. To report a bug or suggest a change, reach out to our support.
+2. **Install Docker Desktop (Windows):**  
+   [Download Docker](https://www.docker.com/products/docker-desktop/) and enable WSL2 integration for Ubuntu.
+
+3. **Install Astronomer CLI:**  
+   In Ubuntu terminal:  
+   ```bash
+   curl -sSL https://install.astronomer.io | bash
+Clone or Create This Repo:
+
+git clone <this-repo>
+cd stock_etl
+astro dev init
+Place Your Files:
+
+fetch_and_load.py → dags/
+
+Copy your Google credentials:
+
+mkdir -p include/credentials
+cp /mnt/c/Users/<YourName>/AppData/Roaming/gcloud/application_default_credentials.json include/credentials/adc.json
+requirements.txt should include:
+
+requests
+google-cloud-bigquery
+Edit/Create DAG:
+
+dags/stock_dag.py — see code in this repo.
+
+Start Airflow:
+
+
+astro dev start --no-cache
+Access Airflow at http://localhost:8080 (login: admin/admin).
+
+Set Alpha Vantage API Key:
+
+Airflow UI → Admin → Variables
+
+Key: alpha_vantage_key
+
+Value: <your-api-key>
+
+Run the DAG:
+
+Toggle on, trigger, and check logs/status.
+
+Verify in BigQuery:
+
+Check that rows are landing in your dataset/table.
+
+File Structure
+stock_etl/
+├── dags/
+│   ├── fetch_and_load.py
+│   └── stock_dag.py
+├── include/
+│   └── credentials/
+│       └── adc.json
+├── requirements.txt
+├── Dockerfile
+├── airflow_settings.yaml
+├── README.md
+└── ...
+Customization
+Add more stocks: Edit the symbols in fetch_and_load.py
+
+Data quality checks: Integrate Great Expectations or add Pandas assertions
+
+Deduplication: Add a BigQuery query or logic to keep only the latest record per day/symbol
+
+Visualization: Connect Google Data Studio or build a Streamlit dashboard
+
+Credits & License
+Built by [Your Name]
+
+Free API via Alpha Vantage
+
+Astronomer for local Airflow dev
+
+Recruiter Notes
+This pipeline demonstrates skills in Python, APIs, cloud data warehouses, Airflow orchestration, Docker, and end-to-end automation.
+
+Troubleshooting
+BigQuery import errors: Check that google-cloud-bigquery is in requirements.txt and restart with astro dev start --no-cache
+
+Credentials errors: Ensure adc.json is in include/credentials/ and your DAG's path matches /usr/local/airflow/include/credentials/adc.json
+
+Docker issues: Confirm Docker Desktop is running and WSL2 integration is enabled
+
